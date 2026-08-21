@@ -7,6 +7,7 @@ See https://www.geeksforgeeks.org/computer-networks/nic-full-form/
 
 **Ethernet Frame** is a fundamental unit of data transmission at Layer 2 of OSI. This wraps an IP packet and provides information, such as sender and recipient hardware addresses.
 
+**Huge Pages** are larger 
 ### Processing Packets in Linux
 First, a packet is sent to a Network Interface Card.
 
@@ -25,6 +26,24 @@ limactl stop Interstate90
 Installation:
 ```
 sudo apt update
+
 sudo apt install -y build-essential meson ninja-build pkg-config \
   g++ libdpdk-dev libpcap-dev python3 python3-pyelftools
+
+echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+grep Huge /proc/meminfo
+pkg-config --modversion libdpdk
+
+meson build
+meson compile -C build
+
+```
+
+Running:
+We need to reserve the RAM for hugepages and then we can run the program.
+```
+echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+grep Huge /proc/meminfo
+
+sudo ./build/interstate90 -l 0 --vdev=net_null0 --no-pci
 ```
