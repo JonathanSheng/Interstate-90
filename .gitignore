@@ -1,0 +1,17 @@
+# Meson / Ninja
+/build/
+/builddir/
+.ninja_deps
+.ninja_log
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.dylib
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
