@@ -36,6 +36,21 @@ if we forward this frame to another machine. If this machine is a forwarder, we 
 
 7) TODO: DPDK focuses more on the parts before this
 
+### How does DPDK differ?
+
+1) Unbind the NIC from the kernel and bind to VFIO, granting our program direct access. Additionally, the RX ring and the buffers are owned by the process. For each buffer, DPDK also builds the metadata required for `sk_buff`.
+
+2) The NIC still receives the signal and DMA into the RX ring. However, we don't ever raise an interrupt.
+
+3) We already have a dedicated core spinning in a loop calling `rte_eth_rx_burst()`. This replaces the need for the interrupt.
+
+4) Within `rte_eth_rx_burst()`, the PMD (Poll Mode Driver) takes the mbuf and passes the packet along and refreshes the slot.
+
+### Tradeoffs
+
+Throughput: DPDK much better
+Latency: DPDK
+CPU utilization: Linux at 0% when no interrupts, DPDK at 100% for polling core
 
 ### Terms
 **Network Interface Card** (NIC) is a hardware component that connects a computer or server to a network. It takes digital data from the computer and turns it into electrical, optical, or radio signals. It also works to translate those signals back into data.
@@ -46,10 +61,6 @@ See https://www.geeksforgeeks.org/computer-networks/nic-full-form/
 **Huge Pages** are larger than normal pages of memory. DPDK requires hugepages to minimize TLB misses. 
 ### Processing Packets in Linux
 First, a packet is sent to a Network Interface Card.
-
-### DPDK (Data Plane Development Kit)
-NIC Poll Mode Driver continuously checks hardware rings instead of waiting for interrupts.
-https://kernel-internals.org/net/life-of-packet-rx/
 
 
 ### Running this project
