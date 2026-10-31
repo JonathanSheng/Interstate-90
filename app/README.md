@@ -15,3 +15,7 @@ Disable PCI, so in our case, do not rely on our hardware NIC.
 EAL
 
 `lcore` is a thread that EAL creates and pins to one specific CPU.
+
+`net_null0` is a null loopback or disconnected device.
+
+`net_pcap` is real frames being recorded

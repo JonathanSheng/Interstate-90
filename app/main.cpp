@@ -43,6 +43,7 @@
 #include <cstdio>
 #define NB_BUF 8191 //Number of buffers held in the shared memory pool
 #define MEMPOOL_CACHE_SIZE 256
+#define BURST_SIZE 32
 
 static struct rte_mempool *mbuf_pool;
 
@@ -105,6 +106,48 @@ int main(int argc, char **argv) {
 	rte_exit(EXIT_FAILURE, "Failed to start the Ethernet port");
   }
 
+  //Let's track the received, sent, and dropped frames
+  uint64_t received_total = 0, sent_total = 0, dropped_total = 0;
+  uint64_t last = rte_get_timer_cycles();
+  const uint64_t hz = rte_get_timer_hz();
+
+  // Infinitely poll for incoming frames and forward
+  for (;;){
+
+	//pull up to 32 buffers from the RX ring
+	struct rte_mbuf *bufs[BURST_SIZE];
+	// store the buffer into bufs and replenish the RX descriptor with a new buffer
+	uint16_t received = rte_eth_rx_burst(port_id, 0, bufs, BURST_SIZE);\
+
+	//Place the received frames onto the TX ring
+	// rte_eth_tx_burst frees the buffer that was received
+	// we still need to free any frames that make it onto the tx ring
+	// but netnull0 doesn't make onto tx
+	uint16_t sent = rte_eth_tx_burst(port_id, 0, bufs, received);
+
+
+	// If a second has passed rte_get_timer_hz, then we log the buffers received and sent
+	received_total += received;
+	sent_total += sent;
+	dropped_total += static_cast<uint64_t>(received - sent);
+
+	const uint64_t now = rte_get_timer_cycles();
+	if (now - last >= hz) {
+		std::printf("rx %llu tx %llu drop %llu\n",
+					static_cast<unsigned long long>(received_total),
+					static_cast<unsigned long long>(sent_total),
+					static_cast<unsigned long long>(dropped_total));
+		last = now;
+	}
+
+
+	//Free any frames that were not sent but were received
+	// The other buffers have been handled by the transmit
+	for (uint16_t i = sent; i < received; i++){
+		rte_pktmbuf_free(bufs[i]);
+	}
+	
+  }
   rte_eal_cleanup();
   return 0;
 }
