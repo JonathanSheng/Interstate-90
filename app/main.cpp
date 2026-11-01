@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 	//pull up to 32 buffers from the RX ring
 	struct rte_mbuf *bufs[BURST_SIZE];
 	// store the buffer into bufs and replenish the RX descriptor with a new buffer
-	uint16_t received = rte_eth_rx_burst(port_id, 0, bufs, BURST_SIZE);\
+	uint16_t received = rte_eth_rx_burst(port_id, 0, bufs, BURST_SIZE);
 
 	//Place the received frames onto the TX ring
 	// rte_eth_tx_burst frees the buffer that was received

@@ -1,3 +1,40 @@
+## About this Project
+Interstate90 is an educational C++20 project for learning about kernel bypass networking using DPDK, built around a Nasdaq TotalView-Itch 5.0 market data feed handler.
+
+
+### Architecture
+Given that we do not have a live market subscription, we will use https://emi.nasdaq.com/ITCH/Nasdaq%20ITCH/ to download recordings of actual Nasdaq trading days.
+
+```
+ ITCH file ──► itch2pcap ──► line A pcap ─┐
+ (Nasdaq)      (tool)    └─► line B pcap ─┤
+                                          ▼
+                     DPDK RX (net_pcap ×2) 
+                                          ▼
+                     MoldUDP64 framing + A/B arbitration + gap detection
+                                          ▼
+                     ITCH 5.0 decode (zero-copy)
+                                          ▼
+                     symbol filter (stock-locate table)
+                                          ▼
+                     per-symbol order books
+                                          ▼
+                     stats accumulator ──► lossy ring ──► observer lcore  ── Phase 3
+```
+
+We will convert the ITCH file to pcaps to replicate an actual stream of data. Given that we have timestamps, we will attempt to replicate the bursts and influx of traffic.
+
+To further replicate the NASDAQ live stream, we will create two lines for packet sending as NASDAQ sends their information in "A" and "B" groups. 
+See https://nasdaqtrader.com/Trader.aspx?id=FeedMIPS
+
+Then instead of the normal linux interrupts, we will use kernel bypass to more process the feed faster.
+
+We'll pull the frames off the RX rings and decode the data 
+See https://nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/moldudp64.pdf
+
+Finally, we'll recreate the order books at that point of time.
+
+
 ### Context
 This project is an educational project to help understand more about Data Plane Development Kit (DPDK).
 OSI model is important, as when we send data we go from top to bottom, adding more information at each layer (encapsulation).
