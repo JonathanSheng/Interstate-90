@@ -10,6 +10,9 @@
 *.so
 *.dylib
 
+# Sample market data (ITCH files)
+/data/
+
 # Editor / OS
 .DS_Store
 *.swp
