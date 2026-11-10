@@ -14,7 +14,7 @@ int main() {
   if (!file) {
     return 1;
   }
-
+  Book book;
   /*
   Binary File Spec:
   https://www.nasdaqtrader.com/content/technicalSupport/specifications/dataproducts/binaryfile.pdf
@@ -40,6 +40,7 @@ int main() {
     case 'A': {
       AddOrder order;
       cast_add_order(order, payload);
+      add_order(book, order); //Add order to our book
       totals[2]++;
       break;
     }
