@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "book/book.hpp"
 #include "decode.hpp"
 
 int main() {
@@ -40,43 +41,49 @@ int main() {
     case 'A': {
       AddOrder order;
       cast_add_order(order, payload);
-      add_order(book, order); //Add order to our book
+      book.add_order(order); //Add order to our book
       totals[2]++;
       break;
     }
     case 'F': {
       AddOrderMpid order;
       cast_add_order_mpid(order, payload);
+      book.add_order(order);
       totals[3]++;
       break;
     }
     case 'E': {
       OrderExecuted executed;
       cast_order_executed(executed, payload);
+      book.execute_order(executed);
       totals[4]++;
       break;
     }
     case 'C': {
       OrderExecutedWithPrice executed;
       cast_order_executed_with_price(executed, payload);
+      book.execute_order(executed);
       totals[5]++;
       break;
     }
     case 'X': {
       OrderCancel cancel;
       cast_order_cancel(cancel, payload);
+      book.cancel_order(cancel);
       totals[6]++;
       break;
     }
     case 'D': {
       OrderDelete deleted;
       cast_order_delete(deleted, payload);
+      book.delete_order(deleted);
       totals[7]++;
       break;
     }
     case 'U': {
       OrderReplace replaced;
       cast_order_replace(replaced, payload);
+      book.replace_order(replaced);
       totals[8]++;
       break;
     }
