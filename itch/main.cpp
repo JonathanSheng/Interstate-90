@@ -1,11 +1,11 @@
+#include "book/book.hpp"
+#include "decode.hpp"
 #include <array>
 #include <cstdint>
 #include <filesystem> // C++17
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "book/book.hpp"
-#include "decode.hpp"
 
 int main() {
 
@@ -36,12 +36,13 @@ int main() {
     case 'R':
       StockDirectory stock_directory;
       cast_stock_directory(stock_directory, payload);
+      book.add_symbol(stock_directory);
       totals[1]++;
       break;
     case 'A': {
       AddOrder order;
       cast_add_order(order, payload);
-      book.add_order(order); //Add order to our book
+      book.add_order(order); // Add order to our book
       totals[2]++;
       break;
     }
@@ -89,11 +90,7 @@ int main() {
     }
     }
   }
-  for (auto const& t: totals){
-    std::cout << t << '\n';
-  }
 
-  
   file.close();
   return 0;
 }

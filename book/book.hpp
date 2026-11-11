@@ -12,8 +12,8 @@ concept AddMessage =
     std::same_as<Added, AddOrder> || std::same_as<Added, AddOrderMpid>;
 
 template <typename Executed>
-concept ExecutedMessage =
-    std::same_as<Executed, OrderExecuted> || std::same_as<Executed, OrderExecutedWithPrice>;
+concept ExecutedMessage = std::same_as<Executed, OrderExecuted> ||
+                          std::same_as<Executed, OrderExecutedWithPrice>;
 
 // Bare minimum of tracking an order
 struct Order {
@@ -25,8 +25,12 @@ struct Order {
 
 // Book holds a mapping of every order_reference: order info
 struct Book {
-  template <AddMessage Added>
-  void add_order(const Added &order);
+
+  std::unordered_map<uint64_t, Order> orders;
+  std::vector<std::array<char, 8>> symbols;
+
+public:
+  template <AddMessage Added> void add_order(const Added &order);
 
   template <ExecutedMessage Executed>
   void execute_order(const Executed &executed);
@@ -35,7 +39,7 @@ struct Book {
   void delete_order(const OrderDelete &deleted);
   void replace_order(const OrderReplace &replaced);
 
-  std::unordered_map<uint64_t, Order> orders;
+  void add_symbol(const StockDirectory &stock);
 
 private:
   void subtract_shares(uint64_t order_reference, uint32_t shares);

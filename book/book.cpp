@@ -1,7 +1,6 @@
 #include "book/book.hpp"
 
-template <AddMessage Added>
-void Book::add_order(const Added &order) {
+template <AddMessage Added> void Book::add_order(const Added &order) {
   Order bookOrder;
   bookOrder.stock_locate = order.stock_locate;
   bookOrder.side = order.side;
@@ -16,12 +15,13 @@ template void Book::add_order<AddOrder>(const AddOrder &);
 template void Book::add_order<AddOrderMpid>(const AddOrderMpid &);
 
 template <ExecutedMessage Executed>
-void Book::execute_order(const Executed &executed){
-    subtract_shares(executed.order_reference, executed.executed_shares);
+void Book::execute_order(const Executed &executed) {
+  subtract_shares(executed.order_reference, executed.executed_shares);
 }
 
 template void Book::execute_order<OrderExecuted>(const OrderExecuted &);
-template void Book::execute_order<OrderExecutedWithPrice>(const OrderExecutedWithPrice &);
+template void
+Book::execute_order<OrderExecutedWithPrice>(const OrderExecutedWithPrice &);
 
 /*
 Cancel order
@@ -42,7 +42,8 @@ void Book::delete_order(const OrderDelete &deleted) {
 Replace Order with new info
 */
 void Book::replace_order(const OrderReplace &replaced) {
-  auto it = orders.find(replaced.original_order_reference); // original order reference to replace
+  auto it = orders.find(
+      replaced.original_order_reference); // original order reference to replace
   if (it == orders.end()) {
     return;
   }
@@ -55,6 +56,16 @@ void Book::replace_order(const OrderReplace &replaced) {
     return;
   }
   orders[replaced.new_order_reference] = bookOrder;
+}
+
+/*
+symbols[stock_locate_number] = "Stock Ticker (AAPL)"
+*/
+void Book::add_symbol(const StockDirectory &stock) {
+  if (stock.stock_locate >= symbols.size()) {
+    symbols.resize(static_cast<size_t>(stock.stock_locate) + 1);
+  }
+  symbols[stock.stock_locate] = stock.stock;
 }
 
 /*
